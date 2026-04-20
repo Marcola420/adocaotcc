@@ -8,13 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    public function handle(Request $request, Closure $next): Response
-    {
-        // Se não estiver logado OU não for admin
-        if (!auth()->check() || !auth()->user()->is_admin) {
-            abort(403, 'Acesso negado');
-        }
-
-        return $next($request);
+    public function handle($request, Closure $next)
+{
+    if (!auth()->check() || auth()->user()->is_admin != 1) {
+        return redirect('/')->with('error', 'Acesso negado');
     }
+
+    return $next($request);
+}
 }

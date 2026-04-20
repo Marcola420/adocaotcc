@@ -7,10 +7,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\AdocaoController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdoptionController;
 
 /*
 |--------------------------------------------------------------------------
-| HOME (LISTA DE PETS)
+| HOME
 |--------------------------------------------------------------------------
 */
 
@@ -29,7 +30,7 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD PADRÃO DO BREEZE
+| DASHBOARD (BREEZE)
 |--------------------------------------------------------------------------
 */
 
@@ -39,43 +40,51 @@ Route::get('/dashboard', function () {
 
 /*
 |--------------------------------------------------------------------------
-| PERFIL (BREEZE)
+| ROTAS LOGADO
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth')->group(function () {
 
+    // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // 🐶 ADOÇÃO (SÓ LOGADO)
-    Route::get('/adotar/{id}', [AdocaoController::class, 'create']);
-    Route::post('/adotar', [AdocaoController::class, 'store']);
+    // Adoção
+    Route::get('/adotar/{id}', [AdocaoController::class, 'create'])->name('adotar.create');
+    Route::post('/adotar', [AdocaoController::class, 'store'])->name('adotar.store');
+
+    // CRUD adoption
+    Route::resource('adoptions', AdoptionController::class);
 });
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN (SÓ ADMIN)
+| ADMIN (PROTEGIDO)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth','admin'])->group(function () {
 
-    // CRUD PETS
+    // Dashboard admin (COM NOME 🔥)
+    Route::get('/admin', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
+
+    // Aprovar / Recusar
+    Route::get('/admin/aprovar/{id}', [AdminController::class, 'aprovar'])
+        ->name('admin.aprovar');
+
+    Route::get('/admin/recusar/{id}', [AdminController::class, 'recusar'])
+        ->name('admin.recusar');
+
+    // CRUD de pets
     Route::resource('pets', PetController::class);
-
-    // DASHBOARD ADMIN
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
-
-    // APROVAR / RECUSAR
-    Route::get('/admin/aprovar/{id}', [AdminController::class, 'aprovar']);
-    Route::get('/admin/recusar/{id}', [AdminController::class, 'recusar']);
 });
 
 /*
 |--------------------------------------------------------------------------
-| AUTH (LOGIN / REGISTER)
+| AUTH
 |--------------------------------------------------------------------------
 */
 
